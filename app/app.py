@@ -118,3 +118,7 @@ def get_stats():
     return result
 
 # --------------------------------------------------------------------------------------------------------------------------------
+
+# Execute main()-function if this script is being run as a standalone
+if __name__ == '__main__':
+    main()
