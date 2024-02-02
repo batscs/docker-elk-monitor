@@ -1,0 +1,13 @@
+services:
+  bats-elk-monitor:
+    build: "https://raw.githubusercontent.com/batscs/docker-elk-monitor/main/Dockerfile" 
+    image: "batscs/docker-elk-monitor"
+    container_name: "bats-elk-monitor"
+    restart: unless-stopped
+    environment:
+      - elastic_domain=http://elasticsearch:9200
+      - elastic_api_key=change_to_your_api_key
+      - elastic_index_name=monitor-0001
+    volumes:
+      - "./data:/app/data"
+      - "/var/run/docker.sock:/var/run/docker.sock"
