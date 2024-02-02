@@ -28,8 +28,8 @@ RUN mkdir -p /app;
 RUN mkdir -p /app/data
 
 RUN curl https://raw.githubusercontent.com/batscs/docker-elk-monitor/main/app/app.py -o /app/app.py
-RUN curl https://raw.githubusercontent.com/batscs/docker-elk-monitor/main/app/elastic_api.py -o elastic_api.py
-RUN curl https://raw.githubusercontent.com/batscs/docker-elk-monitor/main/app/init.sh -o init.sh
+RUN curl https://raw.githubusercontent.com/batscs/docker-elk-monitor/main/app/elastic_api.py -o /app/elastic_api.py
+RUN curl https://raw.githubusercontent.com/batscs/docker-elk-monitor/main/app/init.sh -o /app/init.sh
 
 RUN chmod +x /app/init.sh
 
