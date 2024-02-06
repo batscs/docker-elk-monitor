@@ -14,7 +14,8 @@
 <a name="introduction"/>
 
 ## Introduction  
-![image](https://github.com/batscs/docker-elk-monitor/assets/31670615/2d8323f3-35fd-4c4e-8d85-7ebb3e6edf4e)
+<img width="1512" alt="Bildschirmfoto 2024-02-06 um 14 08 06" src="https://github.com/batscs/docker-elk-monitor/assets/31670615/b08fd45d-df35-4ad9-9cc9-8c1ce6376e28">
+
 
 Periodically collect metrics of all your docker containers and send the data to your elasticsearch endpoint to display a monitoring dashboard in Kibana.
 
