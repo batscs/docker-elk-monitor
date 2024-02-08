@@ -102,8 +102,11 @@ def get_stats():
             data["tx_mb"] = round(stats["networks"]["eth0"]["tx_bytes"] / 1000 / 1000, 2)
             data["rx_mb"] = round(stats["networks"]["eth0"]["rx_bytes"] / 1000 / 1000, 2)
             data["pids"] = stats["pids_stats"]["current"]
-            result[name] = data
-            print(f"Fetched Information for Docker Container {name}")
+            if data["cpu"] >= 0:
+                print(f"Fetched Information for Docker Container {name}")
+                result[name] = data
+            else:
+                print(f"Error while fetching Information about {name} Container (Negative CPU-Usage)")
         except:
             print(f"Error while fetching Information about {name} Container")
 
