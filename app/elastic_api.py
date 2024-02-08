@@ -58,22 +58,5 @@ class ElasticAPI:
 
         response = helpers.bulk(self.client, self.elastic_documents)
 
-        # Dividing all data into smaller chunks
-        # max_elements * 2, because every data record consists of two array-elements (see elastic_append_data)
-        # chunks = array_divide_chunks(self.elastic_documents, self.elastic_bulk_max_elements * 2)
-
-        if self.connect and False:
-            for (index, chunk) in enumerate(chunks):
-                # ElasticSearch Bulk API Communication (Sending of the Data)
-                # response = self.client.bulk(operations=chunk)
-
-                # Printing of the Response
-                print(str(index + 1) + ". ElasticSearch Response -> Errors: " + str(
-                    response["errors"]) + ", Items: " + str(
-                    len(response["items"])))
-
-                # Debug-Printing of entire response
-                if self.debug: print(response)
-
         # Clear Documents
         self.elastic_documents = []
