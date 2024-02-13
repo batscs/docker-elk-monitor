@@ -2,6 +2,7 @@ import argparse
 import docker
 import pprint
 from elastic_api import ElasticAPI
+import re as regex
 
 # --------------------------------------------------------------------------------------------------------------------------------
 
@@ -45,6 +46,7 @@ client = docker.from_env()
 elastic = ElasticAPI(elastic_domain, elastic_api_key, elastic_index_name, debug=debug, connect=elastic_upload)
 pp = pprint.PrettyPrinter(indent=4)
 
+collapse_stacks = True
 
 # --------------------------------------------------------------------------------------------------------------------------------
 
@@ -52,23 +54,25 @@ def main():
     stats = get_stats()
 
     total = {
-        "container": "total",
+        "name": "total",
+        "type": "total",
         "cpu": 0,
-        "memory_mb": 0,
-        "tx_mb": 0,
-        "rx_mb": 0,
+        "memory.mb": 0,
+        "tx.mb": 0,
+        "rx.mb": 0,
+        "memory.b": 0,
+        "tx.b": 0,
+        "rx.b": 0,
         "pids": 0,
         "storage_gb": 0
     }
 
     for container in stats:
-        document = {}
-        document["container"] = container
-        for stat in stats[container]:
-            document[stat] = stats[container][stat]
-            total[stat] += document[stat]
+        for stat in container:
+            if stat != "type" and stat != "name":
+                total[stat] += container[stat]
 
-        elastic.append_data(document)
+        elastic.append_data(container)
 
     elastic.append_data(total)
     elastic.submit_data()
@@ -86,37 +90,54 @@ def calculate_cpu_percent(status):
     cpuPercent = round(cpuPercent, 2)
     return cpuPercent
 
+# ---------------
+
+def add(collection, containername, stats):
+    found = False
+    for container in collection:
+        if container["name"] == containername:
+            found = True
+            for stat in stats:
+                container[stat] += stats[stat]
+                container["type"] = "stack"
+
+    if not found:
+        container = (stats)
+        container["name"] = containername
+        container["type"] = "container"
+        collection.append(container)
 
 # --------------------------------------------------------------------------------------------------------------------------------
 
 def get_stats():
-    result = {}
+    result = []
     for container in client.containers.list():
         name = "Unknown"
         try:
             data = {}
             stats = container.stats(decode=None, stream=False)
             name = stats['name']
+
+            match = regex.search("\/(.*)(-|_)(.*)-[0-9]", name)
+            # if container is part of stack, use stack name instead of full container name
+            if collapse_stacks and bool(match):
+                name = match.group(1)
+
             data["cpu"] = calculate_cpu_percent(stats)
-            data["memory_mb"] = round(stats["memory_stats"]["usage"] / 1000 / 1000, 2)
-            data["tx_mb"] = round(stats["networks"]["eth0"]["tx_bytes"] / 1000 / 1000, 2)
-            data["rx_mb"] = round(stats["networks"]["eth0"]["rx_bytes"] / 1000 / 1000, 2)
+            data["memory.mb"] = round(stats["memory_stats"]["usage"] / 1000 / 1000, 2)
+            data["tx.mb"] = round(stats["networks"]["eth0"]["tx_bytes"] / 1000 / 1000, 2)
+            data["rx.mb"] = round(stats["networks"]["eth0"]["rx_bytes"] / 1000 / 1000, 2)
+            data["memory.b"] = stats["memory_stats"]["usage"]
+            data["tx.b"] = stats["networks"]["eth0"]["tx_bytes"]
+            data["rx.b"] = stats["networks"]["eth0"]["rx_bytes"]
             data["pids"] = stats["pids_stats"]["current"]
             if data["cpu"] >= 0:
-                print(f"Fetched Information for Docker Container {name}")
-                result[name] = data
+                print(f"Fetched Information for Docker Container {stats['name']}")
+                add(result, name, data)
             else:
                 print(f"Error while fetching Information about {name} Container (Negative CPU-Usage)")
         except:
             print(f"Error while fetching Information about {name} Container")
-
-    # Because Storage-Usage is not in container.stats()
-    info = client.df()
-    for container in info['Containers']:
-        if 'SizeRw' in container:
-            for name in container["Names"]:
-                if name in result:
-                    result[name]["storage_gb"] = round(container["SizeRw"] / 1000 / 1000 / 1000, 3)
 
     return result
 
