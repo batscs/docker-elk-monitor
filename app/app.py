@@ -118,7 +118,7 @@ def get_stats():
             stats = container.stats(decode=None, stream=False)
             name = stats['name']
 
-            match = regex.search("\/(.*)(-|_)(.*)-[0-9]", name)
+            match = regex.search("\/(.*)(-|_)(.*)(-|_)[0-9]", name)
             # if container is part of stack, use stack name instead of full container name
             if collapse_stacks and bool(match):
                 name = match.group(1)
