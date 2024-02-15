@@ -124,13 +124,12 @@ def get_stats():
                 name = match.group(1)
 
             data["cpu"] = calculate_cpu_percent(stats)
-            data["memory.mb"] = round(stats["memory_stats"]["usage"] / 1000 / 1000, 2)
-            data["tx.mb"] = round(stats["networks"]["eth0"]["tx_bytes"] / 1000 / 1000, 2)
-            data["rx.mb"] = round(stats["networks"]["eth0"]["rx_bytes"] / 1000 / 1000, 2)
-            data["memory.b"] = stats["memory_stats"]["usage"]
+            # Memory Usage subtracted with inactive_files to mirror behavior of 'docker stats' and linux ram calculation, ignoring buffer/cache
+            data["memory.b"] = stats["memory_stats"]["usage"] - stats["memory_stats"]["stats"]["inactive_file"]
             data["tx.b"] = stats["networks"]["eth0"]["tx_bytes"]
             data["rx.b"] = stats["networks"]["eth0"]["rx_bytes"]
             data["pids"] = stats["pids_stats"]["current"]
+
             if data["cpu"] >= 0:
                 print(f"Fetched Information for Docker Container {stats['name']}")
                 add(result, name, data)
