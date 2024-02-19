@@ -57,14 +57,10 @@ def main():
         "name": "total",
         "type": "total",
         "cpu": 0,
-        "memory.mb": 0,
-        "tx.mb": 0,
-        "rx.mb": 0,
         "memory.b": 0,
         "tx.b": 0,
         "rx.b": 0,
         "pids": 0,
-        "storage_gb": 0
     }
 
     for container in stats:
