@@ -14,9 +14,11 @@ else
     INTERVAL=10
 fi
 
+echo "Interval=$INTERVAL"
+
 # Function to execute the command in a new shell
 execute_command() {
-    bash -c "$COMMAND"
+    bash -c "$COMMAND" &
 }
 
 # Infinite loop to periodically execute the command
