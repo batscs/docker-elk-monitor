@@ -13,6 +13,8 @@ class ElasticAPI:
         self.debug = debug
         self.connect = connect
 
+        self.elastic_index_cleanup = True
+
         if self.connect: self.client = Elasticsearch(
             elastic_domain,
             api_key=elastic_api_key,
@@ -56,7 +58,14 @@ class ElasticAPI:
 
         print(self.elastic_documents)
 
+        # Upload Fetched Data
         response = helpers.bulk(self.client, self.elastic_documents)
+
+        # Remove Data from Index older than 2 days.
+        if self.elastic_index_cleanup: response = self.client.delete_by_query(
+            index=self.elastic_index_name,
+            body={"query": {"range": {"@timestamp": { "lte": "now-2d" }}}},
+        )
 
         # Clear Documents
         self.elastic_documents = []
